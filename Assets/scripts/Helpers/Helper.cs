@@ -4,7 +4,13 @@ using UnityEngine;
 
 public class Helper
 {
-
+    /// <summary>
+    /// Determining equality by hashes of elements
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <returns></returns>
     public static bool ListEquals<T>(List<T> a, List<T> b)
     {
         if (a != null && b != null)

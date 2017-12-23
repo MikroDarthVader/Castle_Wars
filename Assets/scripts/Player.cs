@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class Player : MonoBehaviour, InputListener
+public class Player : MonoBehaviour
 {
     public GameObject castle;
 
@@ -20,7 +20,7 @@ public class Player : MonoBehaviour, InputListener
 
     
 
-    List<InputAction> controlsConfig;
+    //List<InputAction> controlsConfig;
 
     // Use this for initialization
     void Start()
@@ -33,8 +33,8 @@ public class Player : MonoBehaviour, InputListener
         rayToLand = new Ray();
         actionMode = 3;
         toolSelector = 0;
-        InputSpeaker.addToListeners(this);
-        controlsConfig = InputSpeaker.loadCombinations(this);
+        //InputSpeaker.addToListeners("player",this);
+        //controlsConfig = InputSpeaker.loadCombinations(this);
     }
 
     // Update is called once per frame
@@ -193,7 +193,7 @@ public class Player : MonoBehaviour, InputListener
         hits[0].transform.SendMessage("operate"); //will used when we create builded operateble objects */
     }
 
-    void InputListener.onKeyDown(KeyCode key)
+    /*void InputListener.onKeyDown(KeyCode key)
     {
 
         string name = null;
@@ -202,7 +202,7 @@ public class Player : MonoBehaviour, InputListener
         {
             foreach (InputAction i in controlsConfig)
                 /*foreach*/
-                if (Helper.ListEquals<KeyCode>(i.combination, InputSpeaker.input))
+                /*if (Helper.ListEquals<KeyCode>(i.combination, InputSpeaker.keyboard))
                     name = i.name;
         }
         else return;
@@ -242,5 +242,5 @@ public class Player : MonoBehaviour, InputListener
     string InputListener.getName()
     {
         return "player";
-    }
+    }*/
 }
