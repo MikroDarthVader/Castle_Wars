@@ -24,7 +24,12 @@ public class ITree<T> // create not-binary tree
     }
 
     /*getBranches*/
-    public List<ITreeBranch<T>> getBranches(ITreeElement<T> junc) // return list of branches, that belong to the junk
+    /// <summary>
+    /// return list of branches, that belong to the junk
+    /// </summary>
+    /// <param name="junc"></param>
+    /// <returns></returns>
+    public List<ITreeBranch<T>> getBranches(ITreeElement<T> junc)
     {
         List<ITreeBranch<T>> branches = new List<ITreeBranch<T>>();
         List<ITreeElement<T>> lasts = new List<ITreeElement<T>>();
@@ -37,6 +42,11 @@ public class ITree<T> // create not-binary tree
         return branches;
     }
 
+    /// <summary>
+    /// recursion which find all last element from start element
+    /// </summary>
+    /// <param name="elem"></param>
+    /// <param name="lasts"></param>
     private void getLasts(ITreeElement<T> elem, List<ITreeElement<T>> lasts)
     {
         if (!elem.isLast())
@@ -50,7 +60,12 @@ public class ITree<T> // create not-binary tree
             lasts.Add(elem);
     }
 
-    private ITreeBranch<T> getBranch(ITreeElement<T> element) // iteration and add to list from last element to root
+    /// <summary>
+    /// iteration and add to list from last element to root
+    /// </summary>
+    /// <param name="element"></param>
+    /// <returns></returns>
+    private ITreeBranch<T> getBranch(ITreeElement<T> element)
     {
         if (element.isLast())
         {
@@ -161,6 +176,6 @@ public class ITreeBranch<T> : List<ITreeElement<T>> // branch - list tree elemen
             else
                 res += i.ToString() + " }";
         }
-        return res; //return branch name + all elements belong to branch;
+        return res; // return branch name + all elements belong to branch;
     }
 }

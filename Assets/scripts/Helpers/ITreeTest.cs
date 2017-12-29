@@ -28,5 +28,4 @@ public class ITreeTest : MonoBehaviour
             Debug.Log(b.ToString());
         }
     }
-
 }

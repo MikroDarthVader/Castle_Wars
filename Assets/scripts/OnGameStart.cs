@@ -2,7 +2,7 @@
 // messages when a game is loaded.
 using UnityEngine;
 
-class MyClass
+class MyClass // creates gameObject which includes all the classes that need to run when game load
 {
     [RuntimeInitializeOnLoadMethod]
     static void OnRuntimeMethodLoad()

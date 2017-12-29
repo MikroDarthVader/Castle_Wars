@@ -104,6 +104,10 @@ public class Castle : MonoBehaviour
     {
     }
 
+    /// <summary>
+    /// recursion for find block that need to fall
+    /// </summary>
+    /// <param name="block"></param>
     void checkForBuildClouds(Builded block)
     {
         Vector3[] directions = new Vector3[] { Vector3.up, Vector3.down, Vector3.forward, Vector3.back, Vector3.right, Vector3.left };
@@ -124,6 +128,15 @@ public class Castle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// while check all block in cloud or find block on the ground
+    /// if block on the ground return true for all previos function
+    /// else go to next block
+    /// </summary>
+    /// <param name="block"></param>
+    /// <param name="branch"></param>
+    /// <param name="directions"></param>
+    /// <returns></returns>
     bool isBranchOnTheGrownd(Builded block, List<Builded> branch, Vector3[] directions)  // recoursive blocks-clouds detecting
     {
         bool isOnTheGrownd = false;
@@ -140,13 +153,17 @@ public class Castle : MonoBehaviour
                 tmp = findByCastlePos(block.getInCastlePos() + directions[i]);
                 if (block.canBuildOn[i] && tmp != null && tmp.canBuildOn[block.getOppositeSide(i)] && findByCastlePos(tmp.getInCastlePos(), branch) == null)  //check tmp is exist, this block and tmp are coupling, and tmp was not checked yet
                 {
-                    isOnTheGrownd = (isBranchOnTheGrownd(tmp, branch, directions) || isOnTheGrownd); //block is on the ground if one of his branches toching the ground
+                    isOnTheGrownd = (isBranchOnTheGrownd(tmp, branch, directions)); //block is on the ground if one of his branches toching the ground
                     tmp = null;
                 }
             }
         return isOnTheGrownd;
     }
 
+    /// <summary>
+    /// drop cloud
+    /// </summary>
+    /// <param name="cloud"></param>
     private void letThisCloudDown(List<Builded> cloud)
     {
         foreach (Builded block in cloud)
@@ -156,6 +173,11 @@ public class Castle : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// find block in castle by position 
+    /// </summary>
+    /// <param name="inCastlePos"></param>
+    /// <returns></returns>
     Builded findByCastlePos(Vector3 inCastlePos)
     {
         foreach (Builded block in castleBlocks)
@@ -168,6 +190,12 @@ public class Castle : MonoBehaviour
         return null;
     }
 
+    /// <summary>
+    /// find block in list of block(used for branch) by position
+    /// </summary>
+    /// <param name="inCastlePos"></param>
+    /// <param name="list"></param>
+    /// <returns></returns>
     Builded findByCastlePos(Vector3 inCastlePos, List<Builded> list)
     {
         foreach (Builded block in list)

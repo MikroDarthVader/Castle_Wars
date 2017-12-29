@@ -37,7 +37,6 @@ public class Cursor : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
     }
 
     void setColor(string name) // set color for cursorCube depending on the situation

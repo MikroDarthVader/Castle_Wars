@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Helper
+public class Helper // contains functions that can't added in other script for some reason
 {
     /// <summary>
     /// Determining equality by hashes of elements
