@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class InputSpeaker : MonoBehaviour
 {
-    static Dictionary<string, InputListener> listeners;
+    static List<InputListener> listeners;
     private static InputState input;
     private Queue<InputEvent> inputByFrame;
     private Event e;
@@ -13,7 +14,7 @@ public class InputSpeaker : MonoBehaviour
 
     private void Awake()
     {
-        listeners = new Dictionary<string, InputListener>();
+        listeners = new List<InputListener>();
         input = new InputState();
         inputByFrame = new Queue<InputEvent>();
 
@@ -21,7 +22,6 @@ public class InputSpeaker : MonoBehaviour
         wasKeyPressed = new List<KeyCode>();
         wasMousePressed = new List<int>();
     }
-
 
     void OnGUI()
     {
@@ -35,7 +35,7 @@ public class InputSpeaker : MonoBehaviour
                 inputByFrame.Enqueue(new InputEvent("shift", false));
                 wasSpecPressed.Remove("shift");
             }
-            else if (!wasSpecPressed.Contains("shift"))
+            else if (!wasSpecPressed.Contains("shift") && e.shift)
             {
                 inputByFrame.Enqueue(new InputEvent("shift", true));
                 wasSpecPressed.Add("shift");
@@ -52,7 +52,7 @@ public class InputSpeaker : MonoBehaviour
                             inputByFrame.Enqueue(new InputEvent("ctrl", false));
                             wasSpecPressed.Remove("ctrl");
                         }
-                        else if (!wasSpecPressed.Contains("ctrl"))
+                        else if (e.type == EventType.KeyDown && !wasSpecPressed.Contains("ctrl"))
                         {
                             inputByFrame.Enqueue(new InputEvent("ctrl", true));
                             wasSpecPressed.Add("ctrl");
@@ -66,7 +66,7 @@ public class InputSpeaker : MonoBehaviour
                             inputByFrame.Enqueue(new InputEvent("alt", false));
                             wasSpecPressed.Remove("alt");
                         }
-                        else if (!wasSpecPressed.Contains("alt"))
+                        else if (e.type == EventType.KeyDown && !wasSpecPressed.Contains("alt"))
                         {
                             inputByFrame.Enqueue(new InputEvent("alt", true));
                             wasSpecPressed.Add("alt");
@@ -83,7 +83,7 @@ public class InputSpeaker : MonoBehaviour
                         inputByFrame.Enqueue(new InputEvent("keyboard", false, (float)e.keyCode));  //freeze if two keys was released at the same time
                         wasKeyPressed.Remove(e.keyCode);
                     }
-                    else if (!wasKeyPressed.Contains(e.keyCode))
+                    else if (e.type == EventType.KeyDown && !wasKeyPressed.Contains(e.keyCode))
                     {
                         inputByFrame.Enqueue(new InputEvent("keyboard", true, (float)e.keyCode));
                         wasKeyPressed.Add(e.keyCode);
@@ -111,13 +111,13 @@ public class InputSpeaker : MonoBehaviour
             /*checking scroll*/
             if (e.isScrollWheel)
             {
-                inputByFrame.Enqueue(new InputEvent("scrollDelta", e.delta.magnitude));
+                inputByFrame.Enqueue(new InputEvent("scrollDelta", e.delta.y));
             }
             /*checking scroll*/
         }
 
         /*checking for specs/keyboard/mouse up - errors*/
-        if(wasSpecPressed.Contains("shift") && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+        if (wasSpecPressed.Contains("shift") && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
         {
             inputByFrame.Enqueue(new InputEvent("shift", false));
             wasSpecPressed.Remove("shift");
@@ -155,51 +155,62 @@ public class InputSpeaker : MonoBehaviour
 
     void Update()
     {
-        //will be translating input to listeners
-        while(inputByFrame.Count > 0)
+        while (inputByFrame.Count > 0)
         {
-            input += inputByFrame.Dequeue();
+            InputEvent delta = inputByFrame.Dequeue();
+            //Debug.Log(delta);
+            //Debug.Log(input);
+            foreach (InputListener listener in listeners)
+            {
+                listener.onAction(input, delta);
+            }
+            input += delta;
         }
 
-        string s = "";
+        /*string s = "";
         foreach(KeyCode k in input.keyboard)
         {
             s += k + "   ";
         }
-        Debug.Log(s);    //log pressed keys
+        Debug.Log(s);    //log pressed keys*/
     }
 
-    public static void addToListeners(string name, InputListener listener)
+    public static void addToListeners(InputListener listener)
     {
         if (listener != null)
         {
-            listeners.Add(name, listener);
+            listeners.Add(listener);
         }
     }
 
-    /*public static List<Combination> loadCombinations(InputListener listener)
+    public static List<InputCombination> loadCombinations(string name)
     {
-        List<Combination> controlsConfig = null;
-        if (listener.getName() == "player") //will be reading from json
+        List<InputCombination> controlsConfig = null;
+        if (name == "player") //will be reading from json !!!ONLY FOR TEST
         {
-            controlsConfig = new List<Combination>();
-            controlsConfig.Add(new Combination("castle_save", loadCombination(KeyCode.KeypadEnter, KeyCode.KeypadPlus)));
-            controlsConfig.Add(new Combination("castle_load", loadCombination(KeyCode.KeypadEnter, KeyCode.KeypadMinus)));
-            controlsConfig.Add(new Combination("operate", loadCombination(KeyCode.Mouse0)));
-            controlsConfig.Add(new Combination("aiming", loadCombination(KeyCode.Mouse1)));
-            controlsConfig.Add(new Combination("actionMode1", loadCombination(KeyCode.Alpha1)));
-            controlsConfig.Add(new Combination("actionMode2", loadCombination(KeyCode.Alpha2)));
-            controlsConfig.Add(new Combination("actionMode3", loadCombination(KeyCode.Alpha3)));
+            controlsConfig = new List<InputCombination>();
+            controlsConfig.Add(new InputCombination("castle_save", new InputState(false, false, false, new List<KeyCode> { KeyCode.P }, new List<int>(), 0), new InputEvent("keyboard", true, (float)KeyCode.LeftBracket)));
+            controlsConfig.Add(new InputCombination("castle_load", new InputState(false, false, false, new List<KeyCode> { KeyCode.P }, new List<int>(), 0), new InputEvent("keyboard", true, (float)KeyCode.RightBracket)));
+            controlsConfig.Add(new InputCombination("operate", new InputState(), new InputEvent("mouse", true, 0)));
+            controlsConfig.Add(new InputCombination("start_aiming", new InputState(), new InputEvent("mouse", true, 1)));
+            controlsConfig.Add(new InputCombination("stop_aiming", new InputState(), new InputEvent("mouse", false, 1)));
+            controlsConfig.Add(new InputCombination("actionMode1", new InputState(), new InputEvent("keyboard", false, (float)KeyCode.Alpha1)));
+            controlsConfig.Add(new InputCombination("actionMode2", new InputState(), new InputEvent("keyboard", false, (float)KeyCode.Alpha2)));
+            controlsConfig.Add(new InputCombination("actionMode3", new InputState(), new InputEvent("keyboard", false, (float)KeyCode.Alpha3)));
         }
-
         return controlsConfig;
-    }*/
+    }
 }
 
 public class InputEvent
 {
     public bool positive;
     public KeyValuePair<string, float> state;
+
+    public override string ToString()
+    {
+        return positive + "  " + state.Key + "  " + state.Value;
+    }
 
     public InputEvent(string key, bool positive, float value)
     {
@@ -215,14 +226,33 @@ public class InputEvent
 
     public InputEvent(string key, float value)
     {
-        positive = true;
+        positive = value >= 0;
         state = new KeyValuePair<string, float>(key, value);
+    }
+
+    public static bool operator ==(InputEvent left, InputEvent right)
+    {
+        return (left.positive == right.positive && left.state.Key == right.state.Key && left.state.Value == right.state.Value);
+    }
+
+    public static bool operator !=(InputEvent left, InputEvent right)
+    {
+        return !(left == right);
+    }
+
+    public override int GetHashCode()
+    {
+        return positive ? state.Key.Length * 100 + (int)state.Value + 10000 : state.Key.Length * 100 + (int)state.Value - 10000;
+    }
+
+    public override bool Equals(object obj)
+    {
+        return (InputEvent)obj == this;
     }
 }
 
 public class InputState
 {
-    public string name;
     public bool shift;
     public bool ctrl;
     public bool alt;
@@ -230,9 +260,8 @@ public class InputState
     public List<int> mouse;
     public float scrollDelta;
 
-    public InputState(string name, bool shift, bool ctrl, bool alt, List<KeyCode> keyboard, List<int> mouse, float scrollDelta)
+    public InputState(bool shift, bool ctrl, bool alt, List<KeyCode> keyboard, List<int> mouse, float scrollDelta)
     {
-        this.name = name;
         this.shift = shift;
         this.ctrl = ctrl;
         this.alt = alt;
@@ -243,7 +272,6 @@ public class InputState
 
     public InputState()
     {
-        name = null;
         shift = false;
         ctrl = false;
         alt = false;
@@ -254,7 +282,6 @@ public class InputState
 
     public InputState(InputState other)
     {
-        name = other.name;
         shift = other.shift;
         ctrl = other.ctrl;
         alt = other.alt;
@@ -265,10 +292,10 @@ public class InputState
 
     public bool Contains(InputState combination)
     {
-        if ((shift == combination.shift) && (ctrl == combination.ctrl) && (alt == combination.alt) &&    //specificators equality
-                ((combination.keyboard != null && Helper.ListEquals(combination.keyboard, keyboard)) ||
-                (combination.mouse != null && Helper.ListEquals(combination.mouse, mouse)) ||
-                (combination.scrollDelta != 0 && combination.scrollDelta != 0)))
+        if ((shift == combination.shift) && (ctrl == combination.ctrl) && (alt == combination.alt) &&       //specificators equality
+                ((combination.keyboard.Count == 0 || Helper.ListEquals(combination.keyboard, keyboard)) &&  //keys equality
+                (combination.mouse.Count == 0 || Helper.ListEquals(combination.mouse, mouse)) &&            //mouse equality   
+                (combination.scrollDelta == 0 || combination.scrollDelta != 0)))                            //scroll equality
             return true;
         else
             return false;
@@ -353,26 +380,64 @@ public class InputState
         }
         return inputState;
     }
+
+    public override string ToString()
+    {
+        return shift + "  " + ctrl + "  " + alt + "  {" + String.Join(",", keyboard.ConvertAll(i => i.ToString()).ToArray()) +
+                                                    "}  {" + String.Join(",", mouse.ConvertAll(i => i.ToString()).ToArray()) +
+                                                    "}  " + scrollDelta;
+    }
 }
 
 public struct InputCombination
 {
-    InputState command;
-    InputEvent delta;
+    public readonly string name;
+    public readonly InputState command;
+    public readonly InputEvent delta;
+
+    public InputCombination(string name, InputState command, InputEvent delta)
+    {
+        this.name = name;
+        this.command = command;
+        this.delta = delta;
+    }
 }
 
 public class InputListener
 {
-    public delegate void action();
-    public Dictionary<action, InputCombination> inputActions;
+    public delegate void Action();
+    public readonly Dictionary<InputCombination, Action> inputActions;
+    public readonly string name;
 
-    public InputListener(string name)
+    public InputListener(object handler, string name)
     {
-        InputSpeaker.addToListeners(name, this);
+        inputActions = new Dictionary<InputCombination, Action>();
+        this.name = name;
+        foreach (InputCombination combination in InputSpeaker.loadCombinations(name))
+        {
+            addCombination(combination, (Action)Delegate.CreateDelegate(typeof(Action), handler, combination.name));
+        }
+        InputSpeaker.addToListeners(this);
     }
 
-    /*public onInputActionDown()
+    public void addCombination(InputCombination combination, Action action)
     {
+        inputActions.Add(combination, action);
+    }
 
-    }*/
+    public string getName()
+    {
+        return name;
+    }
+
+    public void onAction(InputState input, InputEvent delta)
+    {
+        foreach (KeyValuePair<InputCombination, Action> actionPair in inputActions)
+        {
+            if (input.Contains(actionPair.Key.command) && delta == actionPair.Key.delta)
+            {
+                actionPair.Value();
+            }
+        }
+    }
 }

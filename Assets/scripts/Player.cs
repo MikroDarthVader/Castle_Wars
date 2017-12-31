@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -18,7 +19,7 @@ public class Player : MonoBehaviour
     public int actionMode, toolSelector;    //am = 1->build , am = 2->operate with handed , am = 3->operate with landed
     private byte[] inputState;
 
-    
+
 
     //List<InputAction> controlsConfig;
 
@@ -33,8 +34,7 @@ public class Player : MonoBehaviour
         rayToLand = new Ray();
         actionMode = 3;
         toolSelector = 0;
-        //InputSpeaker.addToListeners("player",this);
-        //controlsConfig = InputSpeaker.loadCombinations(this);
+        InputListener myListener = new InputListener(this, "player");
     }
 
     // Update is called once per frame
@@ -193,54 +193,45 @@ public class Player : MonoBehaviour
         hits[0].transform.SendMessage("operate"); //will used when we create builded operateble objects */
     }
 
-    /*void InputListener.onKeyDown(KeyCode key)
+    /*for input test*/
+    public void castle_save()
     {
-
-        string name = null;
-
-        if (controlsConfig != null)
-        {
-            foreach (InputAction i in controlsConfig)
-                /*foreach*/
-                /*if (Helper.ListEquals<KeyCode>(i.combination, InputSpeaker.keyboard))
-                    name = i.name;
-        }
-        else return;
-
-        if (name == null)
-            return;
-
-        //Debug.Log(name);
-
-        switch (name)
-        {
-            case "castle_save":
-                break;
-            case "castle_load":
-                break;
-            case "operate":
-                break;
-            case "aiming":
-                break;
-            case "actionMode1":
-                break;
-            case "actionMode2":
-                break;
-            case "actionMode3":
-                break;
-        }
+        Debug.Log("custle_save");
     }
 
-    void InputListener.onKeyUp(KeyCode key)
+    public void castle_load()
     {
+        Debug.Log("castle_load");
     }
 
-    void InputListener.onMouseScroll(float delta)
+    public void operate()
     {
+        Debug.Log("operate");
     }
 
-    string InputListener.getName()
+    public void start_aiming()
     {
-        return "player";
-    }*/
+        Debug.Log("start_aiming");
+    }
+
+    public void stop_aiming()
+    {
+        Debug.Log("stop_aiming");
+    }
+
+    public void actionMode1()
+    {
+        Debug.Log("actionMode1");
+    }
+
+    public void actionMode2()
+    {
+        Debug.Log("actionMode2");
+    }
+
+    public void actionMode3()
+    {
+        Debug.Log("actionMode3");
+    }
+    /*for input test*/
 }
